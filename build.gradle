@@ -10,6 +10,12 @@ repositories {
     mavenCentral()
 }
 
+release {
+    versionStrategy semanticRelease.releaseStrategy.copyWith{
+        preReleaseStrategy = it.copyWith(inferredPreRelease: 'rc')
+    }
+}
+
 semanticRelease {}
 
 dependencies {
