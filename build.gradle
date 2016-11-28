@@ -1,8 +1,16 @@
+plugins {
+    id 'de.gliderpilot.semantic-release' version '1.2.0'
+}
 apply plugin: 'groovy'
+
+apply plugin: 'maven-publish'
+group = 'com.praqma'
 
 repositories {
     mavenCentral()
 }
+
+semanticRelease {}
 
 dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.4.7'
