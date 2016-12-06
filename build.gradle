@@ -16,20 +16,26 @@ repositories {
 
 release {
     versionStrategy semanticRelease.releaseStrategy.copyWith(
-        // the type is important, without type you would again replace the default strategy
-        type: 'rc',
-        selector: { SemVerStrategyState state ->
-            !state.repoDirty && state.currentBranch.name ==~ /release.*/ &&
-                    semanticRelease.semanticStrategy.canRelease(state) && project.gradle.startParameter.taskNames.find { it == 'release' }
-        },
-        preReleaseStrategy: StrategyUtil.all({ it.copyWith(inferredPreRelease: 'rc') } as PartialSemVerStrategy, Strategies.PreRelease.COUNT_INCREMENTED)
+            // the type is important, without type you would again replace the default strategy
+            type: 'rc',
+            selector: { SemVerStrategyState state ->
+                state.currentBranch.name ==~ /integration.*/ &&
+                        semanticRelease.semanticStrategy.canRelease(state) &&
+                        state.nearestVersion.distanceFromAny &&
+                        !state.isRepoDirty() &&
+                        project.gradle.startParameter.taskNames.find { it == 'release' }
+            },
+            preReleaseStrategy: StrategyUtil.all({ it.copyWith(inferredPreRelease: 'rc') } as PartialSemVerStrategy,
+                    Strategies.PreRelease.COUNT_INCREMENTED)
     )
 }
 
-semanticRelease {
-	repo {
-    }
-}
+println "Current tag: " + grgit.tag.list()[grgit.tag.list().size() - 1].getName()
+
+def branchName = "${grgit.branch.current.name}"
+def suffix = (branchName == "integration" || branchName == "master")? "": "-dev.${grgit.head().abbreviatedId}"
+println "Inferred version: " + project.version
+println "branch Name: " + branchName
 
 dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.4.7'
